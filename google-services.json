@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "991612815835",
+    "project_id": "viettel-connect",
+    "storage_bucket": "viettel-connect.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:991612815835:android:12281990aab73276387ffe",
+        "android_client_info": {
+          "package_name": "com.viettel.connect"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_21APlf4hTZ5P-rGng_tfAyQ9cUUIT8M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

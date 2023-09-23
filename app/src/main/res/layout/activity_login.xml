@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ui.activities.LoginActivity"
+    >
+
+   <androidx.appcompat.widget.AppCompatImageView
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:background="@drawable/background_logo"
+       android:src="@mipmap/logo_viettel_connect"
+       android:layout_gravity="center"
+       android:layout_marginTop="20dp"
+       android:layout_marginBottom="20dp"
+       />
+
+
+   <com.google.android.material.textfield.TextInputLayout
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:layout_marginTop="20dp"
+       android:layout_marginHorizontal="20dp">
+
+      <com.google.android.material.textfield.TextInputEditText
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:hint="@string/email"
+          android:inputType="textEmailAddress"
+          android:maxLines="1"
+          android:textColor="@color/black"
+          android:textColorHint="#546E7A"
+          android:textSize="14sp" />
+   </com.google.android.material.textfield.TextInputLayout>
+
+   <com.google.android.material.textfield.TextInputLayout
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:layout_marginTop="20dp"
+       android:layout_marginHorizontal="20dp"
+       app:passwordToggleEnabled="true">
+      <com.google.android.material.textfield.TextInputEditText
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:textColor="@color/black"
+          android:textSize="14sp"
+          android:hint="@string/password"
+          android:inputType="textPassword"
+          android:maxLines="1"/>
+   </com.google.android.material.textfield.TextInputLayout>
+
+
+   <TextView
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:text="Quên mật khẩu?"
+       android:layout_gravity="end"
+       android:layout_marginTop="16dp"
+       android:layout_marginEnd="20dp"
+       android:textColor="@color/crimson"
+       android:textStyle="bold"
+       android:textSize="16sp"/>
+
+   <Button
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:layout_marginHorizontal="20dp"
+       android:layout_marginTop="16dp"
+       android:backgroundTint="@color/crimson"
+       android:minHeight="48dp"
+       android:paddingVertical="8dp"
+       android:text="Đăng nhập"
+       android:textAllCaps="true"
+       android:textSize="14sp" />
+   <LinearLayout
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+      android:orientation="horizontal"
+       android:layout_marginTop="16dp"
+       android:gravity="center"
+       android:layout_marginHorizontal="20dp"
+       >
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:textSize="14sp"
+          android:text="Chưa có tài khoản Viettel Connect?"/>
+
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="match_parent"
+          android:linksClickable="true"
+          android:layout_marginStart="8dp"
+          android:text="Đăng kí ngay"
+          android:textColor="@color/crimson"
+          android:textStyle="bold|italic"
+          android:textSize="14sp"
+          android:textColorLink="@color/black" />
+   </LinearLayout>
+
+
+
+
+</LinearLayout>

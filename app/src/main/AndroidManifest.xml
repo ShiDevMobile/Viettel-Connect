@@ -13,7 +13,7 @@
         android:theme="@style/Theme.ViettelConnect"
         tools:targetApi="31">
         <activity
-            android:name=".ui.activities.SignUpActivity"
+            android:name=".ui.activities.RegisterActivity"
             android:exported="false"
             android:label="@string/title_activity_sign_up"
             android:theme="@style/Theme.ViettelConnect" />

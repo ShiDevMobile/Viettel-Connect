@@ -3,13 +3,13 @@ package com.viettel.connect.ui.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.viettel.connect.data.models.User
 import com.viettel.connect.data.repositories.UserRepository
 
 
 sealed class RegistrationStatus {
     data object Success : RegistrationStatus()
     data class Error(val message: String) : RegistrationStatus()
-    // Các trạng thái khác nếu cần
 }
 
 class UserViewModel : ViewModel() {
@@ -19,10 +19,10 @@ class UserViewModel : ViewModel() {
     val registrationStatus: LiveData<RegistrationStatus>
         get() = _registrationStatus
 
-    fun registerUser(email: String, name: String, password: String) {
+    fun registerUser(email: String, password: String, name: String) {
 
         try {
-            userRepository.registerUser(email, name, password)
+            userRepository.registerUser(email, password, name)
             _registrationStatus.value = RegistrationStatus.Success
         } catch (e: Exception) {
             // Xử lý lỗi và cập nhật trạng thái lỗi
@@ -30,11 +30,12 @@ class UserViewModel : ViewModel() {
         }
     }
 
-    fun loginUser(email: String, password: String) {
-        userRepository.loginUser(email, password)
+    fun loginUser(email: String, password: String, callback: (Boolean) -> Unit) {
+        userRepository.loginUser(email, password, callback)
     }
 
-    suspend fun getCurrentUser() = userRepository.getCurrentUser()
+
+    fun getCurrentUser(callback: (User?) -> Unit) = userRepository.getCurrentUser(callback)
 
 
 }

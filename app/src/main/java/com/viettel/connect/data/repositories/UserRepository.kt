@@ -2,58 +2,78 @@ package com.viettel.connect.data.repositories
 
 import android.content.ContentValues.TAG
 import android.util.Log
-import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.FirebaseFirestore
 import com.viettel.connect.data.models.User
 import com.viettel.connect.utils.UserUtils.determineUserRole
-import kotlinx.coroutines.tasks.await
+import java.util.Calendar
+import java.util.Date
 
 
 class UserRepository {
     private val auth = FirebaseAuth.getInstance()
-    private val database = FirebaseDatabase.getInstance()
-    private val usersRef = database.reference.child("users")
+    private val firestore = FirebaseFirestore.getInstance()
+    private val usersCollection = firestore.collection("users")
     fun registerUser(email: String, password: String, name: String) {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    val userId = auth.currentUser?.uid ?: ""
                     val userRole = determineUserRole(email)
+                    val currentUser = auth.currentUser
 
-                    val user = User(
-                        userId = userId,
-                        userName = name,
-                        avatar = null,
-                        email = email,
-                        password = password,
-                        address = "",
-                        role = userRole
-                    )
+                    if (currentUser != null) {
+                        val currentDate = Calendar.getInstance()
+                        val year = currentDate.get(Calendar.YEAR)
+                        val month = currentDate.get(Calendar.MONTH) + 1
+                        val day = currentDate.get(Calendar.DAY_OF_MONTH)
+                        val userId = currentUser.uid
+                        val user = User(
+                            userId,
+                            name,
+                            "",
+                            email,
+                            password,
+                            "",
+                            Date(year, month, day),
+                            userRole
+                        )
+                        usersCollection.document(userId).set(user)
+                    }
 
-                    usersRef.child(userId).setValue(user)
-                        .addOnCompleteListener {
-                            Log.e(TAG, "Luu thanh cong")
-                        }
 
-
-
-                } else {
-                    // Xử lý lỗi nếu đăng ký thất bại
                 }
             }
     }
 
-    fun loginUser(email: String, password: String) {
+    fun loginUser(email: String, password: String, callback: (Boolean) -> Unit) {
+
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Log.d(TAG, "signInWithCustomToken:success")
+                    callback(true)
+                } else {
+                    Log.w(TAG, "signInWithCustomToken:failure", task.exception)
+                    callback(false)
+                }
+            }
 
     }
 
-    suspend fun getCurrentUser(): User? {
+    fun getCurrentUser(callback: (User?) -> Unit) {
         val currentUser = auth.currentUser
         if (currentUser != null) {
-            return usersRef.child(currentUser.uid).get().await().getValue(User::class.java)
+            usersCollection.document(currentUser.uid).get()
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val snapshot = task.result
+                        val user = snapshot.toObject(User::class.java)
+                        callback(user)
+                    } else {
+                        callback(null)
+                    }
+                }
         }
-        return null
     }
 
 

@@ -1,85 +1,137 @@
 package com.viettel.connect.ui.activities
 
+import android.R
+import android.app.AlertDialog
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
-import android.widget.Toast
+import android.widget.ArrayAdapter
 import androidx.lifecycle.ViewModelProvider
-import com.google.firebase.auth.FirebaseAuth
 import com.viettel.connect.databinding.ActivityLoginBinding
 import com.viettel.connect.extensions.ValidationExtensions.validateInput
-import com.viettel.connect.extensions.ValidationRule
+import com.viettel.connect.ui.base.BaseActivity
 import com.viettel.connect.ui.viewmodel.UserViewModel
-import com.viettel.connect.utils.UserUtils
-import com.viettel.connect.utils.UserUtils.isStrongPassword
-import com.viettel.connect.utils.UserUtils.isValidEmail
-
-class LoginActivity : AppCompatActivity() {
+import com.viettel.connect.utils.SharedPreferencesManager
+import com.viettel.connect.utils.ToastUtil.showToast
+import com.viettel.connect.utils.ValidationRules
 
 
-    private lateinit var binding: ActivityLoginBinding
+class LoginActivity : BaseActivity<ActivityLoginBinding>() {
+
+    private var isLoggedIn = false
     private val viewModel: UserViewModel by lazy {
         ViewModelProvider(this)[UserViewModel::class.java]
     }
+    private lateinit var sharedPreferencesManager: SharedPreferencesManager
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityLoginBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun initBinding(): ActivityLoginBinding {
+        val binding = ActivityLoginBinding.inflate(layoutInflater)
+        setupRegistrationLink(binding)
+        setupValidationRules(binding)
+        setupLoginButton(binding)
+        setupEmailAutoComplete()
+        sharedPreferencesManager = SharedPreferencesManager(this)
+        return binding
+    }
 
-        val registerTextView = binding.registerTextview
-
-        registerTextView.setOnClickListener {
-            val intent = Intent(this, RegisterActivity::class.java)
-            startActivity(intent)
-            finish()
+    private fun setupEmailAutoComplete() {
+        val emailInputEditText = binding.emailInputEdittext
+        val previousEmails = getLoggedInEmails()
+        val adapter = ArrayAdapter(this, R.layout.simple_dropdown_item_1line, previousEmails)
+        emailInputEditText.setAdapter(adapter)
+        emailInputEditText.setOnItemClickListener { _, _, position, _ ->
+            // Xử lý khi người dùng chọn một email từ danh sách
+            val selectedEmail = adapter.getItem(position)
+            val passwordInputEditText = binding.passwordInputEdittext
+            passwordInputEditText.setText("") // Xóa mật khẩu cũ (nếu có)
+            passwordInputEditText.clearFocus()
+            passwordInputEditText.requestFocus()
+            emailInputEditText.setText(selectedEmail)
         }
+    }
 
-        val emailInputLayout = binding.emailInputLayout
-        val passwordInputLayout = binding.passwordInputLayout
-
-        val emailValidationRules = listOf(
-            ValidationRule({ it.isNotEmpty() }, "Email không được để trống"),
-            ValidationRule(
-                { it.matches(Regex("[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+")) },
-                "Email không hợp lệ"
-            )
-        )
-        val passwordValidationRules = listOf(
-            ValidationRule({ it.isNotEmpty() }, "Mật khẩu không được để trống"),
-            ValidationRule({ it.length >= 8 }, "Mật khẩu phải có ít nhất 8 ký tự"),
-            ValidationRule(
-                { isStrongPassword(it) },
-                "Mật khẩu phải chứa chữ viết hoa, số và chữ thường"
-            )
-        )
-
-        emailInputLayout.validateInput(emailValidationRules)
-        passwordInputLayout.validateInput(passwordValidationRules)
-
+    private fun setupLoginButton(binding: ActivityLoginBinding) {
         val emailInputEditText = binding.emailInputEdittext
         val passwordInputEditText = binding.passwordInputEdittext
-
         val loginButton = binding.loginButton
+
         loginButton.setOnClickListener {
             val email = emailInputEditText.text.toString()
             val password = passwordInputEditText.text.toString()
+            try {
+                viewModel.loginUser(email = email, password = password) { isSuccess, _ ->
+                    if (isSuccess) {
+                        showToast(this, "Đăng nhập thành công")
 
+                        isLoggedIn = true
+                        saveLoggedInEmail(email)
 
-            viewModel.loginUser(email = email, password = password) { isSuccess ->
-                if (isSuccess) {
-                    Toast.makeText(this, "Dang nhap thanh cong", Toast.LENGTH_SHORT).show()
-                    val intent = Intent(this, HomeActivity::class.java)
-                    startActivity(intent)
-                    finish()
-                } else {
-                    Toast.makeText(this, "Dang nhap that bai", Toast.LENGTH_SHORT).show()
+                        showAccountSuggestion()
+                        navigateToHome()
+                    } else {
+                        showToast(this, "Đăng nhập thất bại")
+                    }
                 }
+            } catch (e: Exception) {
+                // Xử lý lỗi ở đây
+                showToast(this, "Lỗi xảy ra: ${e.localizedMessage}")
             }
-
-
         }
+    }
 
+    private fun saveLoggedInEmail(email: String) {
+        val previousEmails = getLoggedInEmails().toMutableSet()
+        previousEmails.add(email)
+        sharedPreferencesManager.savePreviousEmails(previousEmails.toList())
 
     }
+
+    private fun getLoggedInEmails(): List<String> {
+        return sharedPreferencesManager.loadPreviousEmails()
+    }
+
+    private fun showAccountSuggestion() {
+        if (isLoggedIn) {
+
+            val previousEmails = getLoggedInEmails()
+            val dialog = AlertDialog.Builder(this)
+                .setTitle("Gợi ý tài khoản")
+                .setItems(previousEmails.toTypedArray()) { _, position ->
+                    // Gắn email vào EditText email
+                    val selectedEmail = previousEmails[position]
+                    val emailInputEditText = binding.emailInputEdittext
+                    emailInputEditText.setText(selectedEmail)
+                }
+                .setPositiveButton("Đóng", null)
+                .create()
+            dialog.show()
+        }
+    }
+
+    private fun navigateToHome() {
+        val intent = Intent(this, HomeActivity::class.java)
+        startActivity(intent)
+        finish()
+    }
+
+    private fun setupValidationRules(binding: ActivityLoginBinding) {
+        val emailInputLayout = binding.emailInputLayout
+        val passwordInputLayout = binding.passwordInputLayout
+
+        emailInputLayout.validateInput(ValidationRules.emailValidationRules())
+        passwordInputLayout.validateInput(ValidationRules.passwordValidationRules())
+    }
+
+    private fun setupRegistrationLink(binding: ActivityLoginBinding) {
+        val registerTextView = binding.registerTextview
+        registerTextView.setOnClickListener {
+            navigateToRegister()
+        }
+
+    }
+
+    private fun navigateToRegister() {
+        val intent = Intent(this, RegisterActivity::class.java)
+        startActivity(intent)
+        finish()
+    }
 }
+

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.activities.LoginActivity">
+    tools:context=".ui.activities.RegisterActivity">
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/logo_app"
@@ -127,7 +127,7 @@
             android:textSize="14sp" />
 
         <TextView
-            android:id="@+id/register_textview"
+            android:id="@+id/login_textview"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginStart="8dp"

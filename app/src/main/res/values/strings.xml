@@ -9,4 +9,6 @@
     <string name="confirm_pasword">Xác nhận mật khẩu</string>
     <string name="fullname">Họ và tên</string>
     <string name="register">Đăng kí</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
